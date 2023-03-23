@@ -4,8 +4,10 @@
 // ctx.fillText("helloworld", 10, 150);
 
 var score = 0,
-  gscore = 0,
-  ghost = false;
+    gscore = 0,
+    countblink = 10,
+    ghost = false;
+
 var player = {
   x: 50,
   y: 100,
@@ -22,6 +24,8 @@ var enemy = {
   moving: 0,
   dirx: 0,
   diry: 0,
+  flash: 0,
+  ghosteat: false
 };
 
 var powerdot = {
@@ -29,7 +33,8 @@ var powerdot = {
   y: 10,
   powerup: false,
   pcountdown: 0,
-  ghostNum: 0
+  ghostNum: 0,
+  ghosteat: false
 };
 
 var canvas = document.createElement("canvas");
@@ -116,16 +121,19 @@ function myNum(n) {
   return Math.floor(Math.random() * n);
 }
 
+// Draw on Canvas
 function render() {
-  context.fillStyle = "#000222";
+  context.fillStyle = "#0000CA";
   context.fillRect(0, 0, canvas.width, canvas.height);
 
-  if (!powerdot.powerup) {
+  //Check if the powerdot is on Screen
+  if (!powerdot.powerup && powerdot.pcountdown < 5) {
     powerdot.x = myNum(420) + 30;
-    powerdot.y = myNum(250);
+    powerdot.y = myNum(250) + 30;
     powerdot.powerup = true;
   }
 
+  // Check if the ghost is on Screen
   if (!ghost) {
     enemy.ghostNum = myNum(5) * 64;
     enemy.x = myNum(450);
@@ -133,11 +141,15 @@ function render() {
     ghost = true;
   }
 
+  //Move enemy
   if (enemy.moving < 0) {
     enemy.moving = myNum(20) * 3 + myNum(1);
     enemy.speed = myNum(3) + 1;
     enemy.dirx = 0;
     enemy.diry = 0;
+    if(powerdot.ghosteat){
+      enemy.speed = enemy.speed * -1;
+    }
 
     if (enemy.moving % 2) {
       if (player.x < enemy.x) {
@@ -174,7 +186,29 @@ function render() {
     enemy.y = canvas.height - 32;
   }
 
-  //Collision detection
+  // Collision Detection ghost
+  if (
+    player.x <= (enemy.x + 26) &&
+    enemy.x <= (player.x + 26) &&
+    player.y <= (enemy.y + 26) &&
+    enemy.y <= (player.y + 32)
+  ) {
+    console.log("You Hit a Ghost!!");
+    if(powerdot.ghosteat){
+      score++;
+    } else {
+      gscore++;
+    }
+
+    player.x = 10;
+    player.y = 100;
+    enemy.x = 300;
+    enemy.y = 200;
+    powerdot.pcountdown = 0;
+
+  }
+
+  //Collision detection powerdot
   if (
     player.x <= powerdot.x &&
     powerdot.x <= player.x + 32 &&
@@ -187,6 +221,18 @@ function render() {
     enemy.ghostNum = 384;
     powerdot.x = 0;
     powerdot.y = 0;
+    powerdot.ghosteat = true;
+    player.speed = 10;
+  }
+
+  //Powerdot countdown
+  if(powerdot.ghosteat){
+    powerdot.pcountdown--;
+    if(powerdot.pcountdown <= 0){
+      powerdot.ghosteat = false;
+      enemy.ghostNum = powerdot.ghostNum;
+      player.speed = 5;
+    }
   }
 
   //Drawing the Power Dot
@@ -198,6 +244,20 @@ function render() {
     context.fill();
   }
 
+
+  //Enemy Blinking 
+  if(countblink > 0){
+    countblink--;
+  } else {
+    countblink = 20;
+    if (enemy.flash == 0) {
+      enemy.flash = 32;
+    } else {
+      enemy.flash = 0;
+    }
+  }
+
+  //Write Score
   context.font = "20px monospace";
   context.fillStyle = "white";
   context.fillText(`Pacman: ${score} vs Ghost: ${gscore}`, 10, 20);
@@ -206,7 +266,7 @@ function render() {
   context.drawImage(
     mainImage,
     enemy.ghostNum,
-    0,
+    enemy.flash,
     32,
     32,
     enemy.x,

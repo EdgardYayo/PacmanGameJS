@@ -8,33 +8,49 @@
                 flex-direction: column;
                 justify-content: center;
                 align-items: center;
-                background: linear-gradient(white,gray, black);
+                background: url("./BigPacman.png");
+                background-size: contain;
                 height: 100vh;
             }
 
             canvas {
-                border: double 15px black;
+                border: double 15px white;
                 border-radius: 20px;
-                box-shadow: 0 0 15px black;
+                box-shadow: 0 0 15px white;
             }
 
             h1 {
                 margin-top: -50px;
                 margin-bottom: 30px;
-                color: black;
-                text-shadow: 1px 1px 3px black;
+                color: white;
+                text-shadow: 1px 1px 3px white;
                 font-size: 3rem;
             }
 
             strong {
                 color: yellow;
             }
+
+            .titleAndGhosts {
+                display: flex;
+                justify-content: space-evenly;
+                align-items: center;
+            }
+
+            .titleAndGhosts > img {
+                width: 100px;
+                height: 100px;
+            }
             
         </style>
         
     </head>
     <body>
-            <h1>WebMan <strong>JS</strong></h1>
+            <div class="titleAndGhosts">
+                <img src="./blue ghost.webp" alt="pacmanGhost"/>
+                <h1>WebMan <strong>JS</strong></h1>
+                <img src="/nigga ghost.webp" alt="pacmanGhost"/>
+            </div>
             <!-- <canvas id="canvasSpace" width="600" height="400"></canvas> -->
             <script src="js.js"></script>
             
