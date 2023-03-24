@@ -6,7 +6,8 @@
 var score = 0,
     gscore = 0,
     countblink = 10,
-    ghost = false;
+    ghost = false,
+    ghost2 = false;
 
 var player = {
   x: 50,
@@ -28,24 +29,40 @@ var enemy = {
   ghosteat: false
 };
 
+var enemy2 = {
+  x: 150,
+  y: 200,
+  speed: 5,
+  moving: 0,
+  dirx: 0,
+  diry: 0,
+  flash: 0,
+  ghosteat: false
+};
+
 var powerdot = {
   x: 10,
   y: 10,
   powerup: false,
   pcountdown: 0,
   ghostNum: 0,
+  ghostNum2: 0,
   ghosteat: false
 };
 
+//Set up Canvas
 var canvas = document.createElement("canvas");
 var context = canvas.getContext("2d");
 canvas.width = 600;
 canvas.height = 400;
+
+//import Image
 mainImage = new Image();
 mainImage.ready = false;
 mainImage.onload = checkReady;
 mainImage.src = "pac.png";
 
+//add keylistener
 var keyclick = {};
 document.addEventListener(
   "keydown",
@@ -64,7 +81,9 @@ document.addEventListener(
   false
 );
 
+// Key functions
 function move(keyclick) {
+  //Check click key value 
   if (37 in keyclick) {
     player.x -= player.speed;
     player.pacdir = 64;
@@ -82,6 +101,7 @@ function move(keyclick) {
     player.pacdir = 32;
   }
 
+  //Prevent run off screen
   if (player.x >= canvas.width - 32) {
     player.x = 0;
   }
@@ -98,6 +118,7 @@ function move(keyclick) {
     player.y = canvas.height - 32;
   }
 
+  //Open close Mouth
   if (player.pacmouth == 320) {
     player.pacmouth = 352;
   } else {
@@ -107,16 +128,19 @@ function move(keyclick) {
   render();
 }
 
+//Function once ready
 function checkReady() {
   this.ready = true;
   playgame();
 }
 
+//Game play loop
 function playgame() {
   render();
   requestAnimationFrame(playgame);
 }
 
+//Random number function
 function myNum(n) {
   return Math.floor(Math.random() * n);
 }
@@ -133,7 +157,7 @@ function render() {
     powerdot.powerup = true;
   }
 
-  // Check if the ghost is on Screen
+  // Check if the ghosts are on Screen
   if (!ghost) {
     enemy.ghostNum = myNum(5) * 64;
     enemy.x = myNum(450);
@@ -141,10 +165,17 @@ function render() {
     ghost = true;
   }
 
+  if (!ghost2) {
+    enemy2.ghostNum = myNum(5) * 64;
+    enemy2.x = myNum(450);
+    enemy2.y = myNum(250) + 30;
+    ghost2 = true;
+  }
+
   //Move enemy
   if (enemy.moving < 0) {
     enemy.moving = myNum(20) * 3 + myNum(1);
-    enemy.speed = myNum(3) + 1;
+    enemy.speed = myNum(2) + 1;
     enemy.dirx = 0;
     enemy.diry = 0;
     if(powerdot.ghosteat){
@@ -170,6 +201,7 @@ function render() {
   enemy.x = enemy.x + enemy.dirx;
   enemy.y = enemy.y + enemy.diry;
 
+  //prevent run off screen
   if (enemy.x >= canvas.width - 32) {
     enemy.x = 0;
   }
@@ -184,6 +216,52 @@ function render() {
 
   if (enemy.y < 0) {
     enemy.y = canvas.height - 32;
+  }
+
+  //Second ghost movement
+  if (enemy2.moving < 0) {
+    enemy2.moving = myNum(20) * 3 + myNum(1);
+    enemy2.speed = myNum(2) + 1;
+    enemy2.dirx = 0;
+    enemy2.diry = 0;
+    if(powerdot.ghosteat){
+      enemy2.speed = enemy2.speed * -1;
+    }
+
+    if (enemy2.moving % 2) {
+      if (player.x < enemy2.x) {
+        enemy2.dirx = -enemy2.speed;
+      } else {
+        enemy2.dirx = enemy2.speed;
+      }
+    } else {
+      if (player.y < enemy2.y) {
+        enemy2.diry = -enemy2.speed;
+      } else {
+        enemy2.diry = enemy2.speed;
+      }
+    }
+  }
+
+  enemy2.moving--;
+  enemy2.x = enemy2.x + enemy2.dirx;
+  enemy2.y = enemy2.y + enemy2.diry;
+
+  //prevent run off screen
+  if (enemy2.x >= canvas.width - 32) {
+    enemy2.x = 0;
+  }
+  
+  if (enemy2.y >= canvas.height - 32) {
+    enemy2.y = 0;
+  }
+
+  if (enemy2.x < 0) {
+    enemy2.x = canvas.width - 32;
+  }
+
+  if (enemy2.y < 0) {
+    enemy2.y = canvas.height - 32;
   }
 
   // Collision Detection ghost
@@ -208,6 +286,27 @@ function render() {
 
   }
 
+  if (
+    player.x <= (enemy2.x + 26) &&
+    enemy2.x <= (player.x + 26) &&
+    player.y <= (enemy2.y + 26) &&
+    enemy2.y <= (player.y + 32)
+  ) {
+    console.log("You Hit a Ghost!!");
+    if(powerdot.ghosteat){
+      score++;
+    } else {
+      gscore++;
+    }
+
+    player.x = 10;
+    player.y = 100;
+    enemy2.x = 300;
+    enemy2.y = 200;
+    powerdot.pcountdown = 0;
+
+  }
+
   //Collision detection powerdot
   if (
     player.x <= powerdot.x &&
@@ -218,7 +317,9 @@ function render() {
     powerdot.powerup = false;
     powerdot.pcountdown = 500;
     powerdot.ghostNum = enemy.ghostNum;
+    powerdot.ghostNum2 = enemy2.ghostNum;
     enemy.ghostNum = 384;
+    enemy2.ghostNum = 384;
     powerdot.x = 0;
     powerdot.y = 0;
     powerdot.ghosteat = true;
@@ -231,6 +332,7 @@ function render() {
     if(powerdot.pcountdown <= 0){
       powerdot.ghosteat = false;
       enemy.ghostNum = powerdot.ghostNum;
+      enemy2.ghostNum = powerdot.ghostNum2;
       player.speed = 5;
     }
   }
@@ -252,8 +354,11 @@ function render() {
     countblink = 20;
     if (enemy.flash == 0) {
       enemy.flash = 32;
+      enemy2.flash = 32;
+    
     } else {
       enemy.flash = 0;
+      enemy2.flash = 0;
     }
   }
 
@@ -262,7 +367,19 @@ function render() {
   context.fillStyle = "white";
   context.fillText(`Pacman: ${score} vs Ghost: ${gscore}`, 10, 20);
 
-  //Drawing the Ghost
+  //Drawing the Ghosts
+  context.drawImage(
+    mainImage,
+    enemy2.ghostNum,
+    enemy2.flash,
+    32,
+    32,
+    enemy2.x,
+    enemy2.y,
+    32,
+    32
+  );
+
   context.drawImage(
     mainImage,
     enemy.ghostNum,

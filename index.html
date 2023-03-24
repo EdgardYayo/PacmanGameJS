@@ -16,7 +16,7 @@
             canvas {
                 border: double 15px white;
                 border-radius: 20px;
-                box-shadow: 0 0 15px white;
+                box-shadow: 0 0 10px white;
             }
 
             h1 {
@@ -47,9 +47,15 @@
     </head>
     <body>
             <div class="titleAndGhosts">
-                <img src="./blue ghost.webp" alt="pacmanGhost"/>
+                <img 
+                style="filter:drop-shadow(1px 1px 5px blue);" 
+                src="./blue ghost.webp" 
+                alt="pacmanGhost"/>
                 <h1>WebMan <strong>JS</strong></h1>
-                <img src="/nigga ghost.webp" alt="pacmanGhost"/>
+                <img 
+                style="filter:drop-shadow(1px 1px 5px #4E268B);" 
+                src="/nigga ghost.webp" 
+                alt="pacmanGhost"/>
             </div>
             <!-- <canvas id="canvasSpace" width="600" height="400"></canvas> -->
             <script src="js.js"></script>
