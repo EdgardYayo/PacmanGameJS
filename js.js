@@ -47,7 +47,7 @@ var powerdot = {
   pcountdown: 0,
   ghostNum: 0,
   ghostNum2: 0,
-  ghosteat: false
+  //ghosteat: false
 };
 
 //Set up Canvas
